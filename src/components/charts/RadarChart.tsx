@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
 import type { Company, PillarScore } from '../../types/company'
+import { getSeriesColor, getFillColor, chartColors } from '../../utils/chartColors'
 
 interface RadarChartProps {
   companies: Company[]
@@ -68,11 +69,11 @@ export const RadarChart: React.FC<RadarChartProps> = ({
       theta: PILLAR_ORDER.map(pillar => PILLAR_LABELS[pillar]),
       name: company.name,
       line: {
-        color: `hsl(${(index * 137.5) % 360}, 70%, 50%)`, // Generate distinct colors
+        color: getSeriesColor(index), // Use CSS-based color generation
         width: company.lineWidth
       },
-      fill: 'toself',
-      fillcolor: `hsla(${(index * 137.5) % 360}, 70%, 50%, ${company.opacity * 0.3})`,
+      fill: 'toself' as const,
+      fillcolor: getFillColor(getSeriesColor(index), company.opacity * 0.3),
       opacity: company.opacity,
       hovertemplate: `<b>${company.name}</b><br>` +
         PILLAR_ORDER.map((pillar, i) => 
@@ -93,24 +94,24 @@ export const RadarChart: React.FC<RadarChartProps> = ({
         visible: true,
         range: [0, 10],
         tickfont: { size: 10, family: 'Inter, sans-serif' },
-        gridcolor: '#d1d5db',
+        gridcolor: chartColors.grid(),
         gridwidth: 1,
-        linecolor: '#d1d5db',
+        linecolor: chartColors.grid(),
         linewidth: 1
       },
       angularaxis: {
         visible: true,
         tickfont: { size: 12, family: 'Inter, sans-serif' },
-        gridcolor: '#d1d5db',
+        gridcolor: chartColors.grid(),
         gridwidth: 1,
-        linecolor: '#d1d5db',
+        linecolor: chartColors.grid(),
         linewidth: 1
       },
       bgcolor: 'rgba(0,0,0,0)'
     },
     showlegend: true,
     legend: {
-      orientation: 'v',
+      orientation: 'v' as const,
       x: 1.05,
       y: 1,
       font: { size: 11, family: 'Inter, sans-serif' }
@@ -128,9 +129,9 @@ export const RadarChart: React.FC<RadarChartProps> = ({
         yref: 'paper' as const,
         text: 'Scores: 0-10 scale',
         showarrow: false,
-        font: { size: 12, color: '#666', family: 'Inter, sans-serif' },
-        bgcolor: 'rgba(255,255,255,0.8)',
-        bordercolor: '#d1d5db',
+        font: { size: 12, color: chartColors.text(), family: 'Inter, sans-serif' },
+        bgcolor: chartColors.background(),
+        bordercolor: chartColors.grid(),
         borderwidth: 1,
         borderpad: 4
       }

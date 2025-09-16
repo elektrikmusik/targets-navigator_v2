@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react'
 import Plot from 'react-plotly.js'
 import type { DetailedPillarScore, PillarSubScores } from '../../types/company'
+import { getScoreColor, getFillColor, chartColors, getScoreBadgeClass } from '../../utils/chartColors'
 
 interface DetailedRadarChartProps {
   detailedPillar: DetailedPillarScore
@@ -70,32 +71,20 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
   className
 }) => {
   // Extract sub-scores and labels for the specific pillar
-  const chartData = useMemo(() => {
+  const chartData = useMemo((): { scores: number[]; labels: string[]; hasData: boolean } => {
     const pillarType = detailedPillar.pillar
     const labels = SUB_SCORE_LABELS[pillarType] || {}
     
-    console.log('DetailedRadarChart - detailedPillar:', detailedPillar)
-    console.log('DetailedRadarChart - pillarType:', pillarType)
     
     if (pillarType === 'overview') {
       // For overview, extract overall scores from each pillar
-      // Always include all 6 pillars, using 0 for missing data to ensure connected polygon
       const allPillars = ['finance', 'industry', 'ip', 'manufacturing', 'ownership', 'hydrogen']
       
-      const pillarScores = allPillars.map(pillar => {
+      const pillarScores: Array<{ key: string; value: number; label: string }> = allPillars.map(pillar => {
         const subScore = detailedPillar.subScores[pillar as keyof PillarSubScores]
-        console.log(`Processing pillar ${pillar}:`, subScore)
         
         // Get the main score from each pillar's sub-scores
-        let mainScore: number
-        if (subScore && Object.values(subScore).some(v => v !== null && v !== undefined && typeof v === 'number')) {
-          mainScore = Object.values(subScore as any).find(v => v !== null && v !== undefined && typeof v === 'number') as number
-          console.log(`Found valid score for ${pillar}:`, mainScore)
-        } else {
-          // Use 0.1 for missing data to ensure edge connection
-          mainScore = 0.1
-          console.log(`No valid score for ${pillar}, using 0.1`)
-        }
+        const mainScore = Object.values(subScore as any).find(v => v !== null && v !== undefined && typeof v === 'number') as number || 0
         
         return {
           key: pillar,
@@ -104,53 +93,45 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
         }
       })
 
+      const scores = pillarScores.map((entry: { key: string; value: number; label: string }) => entry.value)
+      const scoreLabels = pillarScores.map((entry: { key: string; value: number; label: string }) => entry.label)
+      
+      // Close the polygon by duplicating the first point at the end
       return {
-        scores: pillarScores.map(entry => entry.value),
-        labels: pillarScores.map(entry => entry.label),
-        hasData: pillarScores.some(entry => entry.value > 0.1) || pillarScores.length > 0 // Consider hasData true if at least one pillar has real data or we have any pillars
+        scores: [...scores, scores[0]],
+        labels: [...scoreLabels, scoreLabels[0]],
+        hasData: true
       }
     } else {
       // For individual pillars, extract sub-scores
       const subScores = detailedPillar.subScores[pillarType]
-      
-      if (!subScores) {
-        return { scores: [], labels: [], hasData: false }
-      }
 
-      // Convert sub-scores to arrays, filtering out null/undefined/non-numeric values
-      const scoreEntries = Object.entries(subScores)
-        .filter(([_, value]) => value !== null && value !== undefined && typeof value === 'number')
+      // Convert sub-scores to arrays
+      const scoreEntries: Array<{ key: string; value: number; label: string }> = Object.entries(subScores!)
+        .filter(([_, value]) => typeof value === 'number')
         .map(([key, value]) => ({
           key,
           value: value as number,
           label: labels[key] || key
         }))
 
+      const scores = scoreEntries.map((entry: { key: string; value: number; label: string }) => entry.value)
+      const scoreLabels = scoreEntries.map((entry: { key: string; value: number; label: string }) => entry.label)
+      
+      // Close the polygon by duplicating the first point at the end
       return {
-        scores: scoreEntries.map(entry => entry.value),
-        labels: scoreEntries.map(entry => entry.label),
-        hasData: scoreEntries.length > 0
+        scores: [...scores, scores[0]],
+        labels: [...scoreLabels, scoreLabels[0]],
+        hasData: true
       }
     }
   }, [detailedPillar])
 
-  // Get color based on overall score
-  const getScoreColor = (score: number | null) => {
-    if (score === null) return '#6b7280'
-    if (score >= 8.0) return '#10b981'
-    if (score >= 6.0) return '#f59e0b'
-    return '#ef4444'
-  }
-
-  const scoreColor = getScoreColor(detailedPillar.overallScore)
+  // Get color based on overall score using CSS custom properties
+  const scoreColor = getScoreColor(detailedPillar.overallScore || 0)
 
   // Chart data configuration
-  const plotData = useMemo(() => {
-    if (!chartData.hasData) {
-      return []
-    }
-
-    return [{
+  const plotData = useMemo(() => [{
       type: 'scatterpolar' as const,
       r: chartData.scores,
       theta: chartData.labels,
@@ -160,14 +141,13 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
         color: scoreColor,
         width: 3
       },
-      fillcolor: `${scoreColor}20`,
+      fillcolor: getFillColor(scoreColor, 0.2),
       hovertemplate: `<b>%{theta}</b><br>Score: %{r:.1f}<extra></extra>`,
       marker: {
         color: scoreColor,
         size: 6
       }
-    }]
-  }, [chartData, detailedPillar.pillar, scoreColor])
+    }], [chartData, detailedPillar.pillar, scoreColor])
 
   // Layout configuration
   const layout = useMemo(() => ({
@@ -183,9 +163,9 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
         visible: true,
         range: [0, 10],
         tickfont: { size: 10, family: 'Inter, sans-serif' },
-        gridcolor: '#e5e7eb',
+        gridcolor: chartColors.grid(),
         gridwidth: 1,
-        linecolor: '#d1d5db',
+        linecolor: chartColors.grid(),
         linewidth: 1,
         tickmode: 'linear' as const,
         tick0: 0,
@@ -194,9 +174,9 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
       angularaxis: {
         visible: true,
         tickfont: { size: 11, family: 'Inter, sans-serif' },
-        gridcolor: '#e5e7eb',
+        gridcolor: chartColors.grid(),
         gridwidth: 1,
-        linecolor: '#d1d5db',
+        linecolor: chartColors.grid(),
         linewidth: 1
       },
       bgcolor: 'rgba(0,0,0,0)'
@@ -215,7 +195,7 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
         text: `Overall: ${detailedPillar.overallScore?.toFixed(1) || 'N/A'}`,
         showarrow: false,
         font: { size: 12, color: scoreColor, family: 'Inter, sans-serif' },
-        bgcolor: 'rgba(255,255,255,0.9)',
+        bgcolor: chartColors.background(),
         bordercolor: scoreColor,
         borderwidth: 1,
         borderpad: 4
@@ -231,19 +211,6 @@ export const DetailedRadarChart: React.FC<DetailedRadarChartProps> = ({
     responsive: true
   }), [])
 
-  // Show message if no data
-  if (!chartData.hasData) {
-    return (
-      <div className={`flex items-center justify-center bg-gray-50 border border-gray-200 rounded-lg ${className}`} style={{ height }}>
-        <div className="text-center">
-          <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <p className="text-gray-500 text-sm">No detailed scores available for this pillar</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className={className}>
@@ -265,15 +232,11 @@ export const SubScoreDetails: React.FC<{ detailedPillar: DetailedPillarScore }> 
 
   if (pillarType === 'overview') {
     // For overview, show overall pillar scores
-    // Always include all 6 pillars, using 0 for missing data
     const allPillars = ['finance', 'industry', 'ip', 'manufacturing', 'ownership', 'hydrogen']
     
     const pillarScores = allPillars.map(pillar => {
       const subScore = detailedPillar.subScores[pillar as keyof PillarSubScores]
-      // Get the main score from each pillar's sub-scores, default to 0.1 if missing (to ensure edge connection)
-      const mainScore = subScore && Object.values(subScore).some(v => v !== null && v !== undefined && typeof v === 'number')
-        ? Object.values(subScore as any).find(v => v !== null && v !== undefined && typeof v === 'number') as number
-        : 0.1
+      const mainScore = Object.values(subScore as any).find(v => v !== null && v !== undefined && typeof v === 'number') as number || 0
       
       return {
         key: pillar,
@@ -282,20 +245,7 @@ export const SubScoreDetails: React.FC<{ detailedPillar: DetailedPillarScore }> 
       }
     })
 
-    if (pillarScores.length === 0) {
-      return (
-        <div className="text-center py-4">
-          <p className="text-gray-500 text-sm">No pillar scores available</p>
-        </div>
-      )
-    }
-
-    const getScoreBadgeColor = (score: number | null) => {
-      if (score === null || score === 0.1) return 'bg-gray-200 text-gray-600'
-      if (score >= 8.0) return 'bg-green-100 text-green-800'
-      if (score >= 6.0) return 'bg-yellow-100 text-yellow-800'
-      return 'bg-red-100 text-red-800'
-    }
+    // Use the centralized badge color function
 
     return (
       <div className="space-y-3">
@@ -304,8 +254,8 @@ export const SubScoreDetails: React.FC<{ detailedPillar: DetailedPillarScore }> 
           {pillarScores.map(({ key, value, label }) => (
             <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">{label}</span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${getScoreBadgeColor(value)}`}>
-                {value === 0.1 ? 'N/A' : (typeof value === 'number' ? value.toFixed(1) : 'N/A')}
+              <span className={`px-2 py-1 rounded text-xs font-medium ${getScoreBadgeClass(value)}`}>
+                {value.toFixed(1)}
               </span>
             </div>
           ))}
@@ -316,28 +266,15 @@ export const SubScoreDetails: React.FC<{ detailedPillar: DetailedPillarScore }> 
     // For individual pillars, show sub-scores
     const subScores = detailedPillar.subScores[pillarType]
 
-    if (!subScores) {
-      return (
-        <div className="text-center py-4">
-          <p className="text-gray-500 text-sm">No detailed scores available</p>
-        </div>
-      )
-    }
-
-    const scoreEntries = Object.entries(subScores)
-      .filter(([_, value]) => value !== null && value !== undefined && typeof value === 'number')
+    const scoreEntries = Object.entries(subScores!)
+      .filter(([_, value]) => typeof value === 'number')
       .map(([key, value]) => ({
         key,
         value: value as number,
         label: labels[key] || key
       }))
 
-    const getScoreBadgeColor = (score: number | null) => {
-      if (score === null) return 'bg-gray-200 text-gray-600'
-      if (score >= 8.0) return 'bg-green-100 text-green-800'
-      if (score >= 6.0) return 'bg-yellow-100 text-yellow-800'
-      return 'bg-red-100 text-red-800'
-    }
+    // Use the centralized badge color function
 
     return (
       <div className="space-y-3">
@@ -346,8 +283,8 @@ export const SubScoreDetails: React.FC<{ detailedPillar: DetailedPillarScore }> 
           {scoreEntries.map(({ key, value, label }) => (
             <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
               <span className="text-sm font-medium text-gray-700">{label}</span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${getScoreBadgeColor(value)}`}>
-                {typeof value === 'number' ? value.toFixed(1) : 'N/A'}
+              <span className={`px-2 py-1 rounded text-xs font-medium ${getScoreBadgeClass(value)}`}>
+                {value.toFixed(1)}
               </span>
             </div>
           ))}

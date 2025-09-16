@@ -2,48 +2,86 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.5rem;
+    /* Base colors with HSL fallbacks for older browsers */
+    --background: hsl(0 0% 100%); /* oklch(1.0000 0 0) */
+    --foreground: hsl(222.2 84% 4.9%); /* oklch(0.2686 0 0) */
+    --card: hsl(0 0% 100%); /* oklch(1.0000 0 0) */
+    --card-foreground: hsl(222.2 84% 4.9%); /* oklch(0.2686 0 0) */
+    --popover: hsl(0 0% 100%); /* oklch(1.0000 0 0) */
+    --popover-foreground: hsl(222.2 84% 4.9%); /* oklch(0.2686 0 0) */
+    --primary: hsl(221.2 83.2% 53.3%); /* oklch(0.7470 0.1636 68.2849) */
+    --primary-foreground: hsl(0 0% 0%); /* oklch(0 0 0) */
+    --secondary: hsl(210 40% 96%); /* oklch(0.9665 0.0045 258.3247) */
+    --secondary-foreground: hsl(222.2 84% 4.9%); /* oklch(0.3836 0.1202 322.4976) */
+    --muted: hsl(210 40% 96%); /* oklch(0.9846 0.0017 247.8389) */
+    --muted-foreground: hsl(215.4 16.3% 46.9%); /* oklch(0.3836 0.1202 322.4976) */
+    --accent: hsl(210 40% 96%); /* oklch(0.9869 0.0214 95.2774) */
+    --accent-foreground: hsl(222.2 84% 4.9%); /* oklch(0.4910 0.1442 43.4774) */
+    --destructive: hsl(0 84.2% 60.2%); /* oklch(0.6496 0.2362 26.9032) */
+    --destructive-foreground: hsl(0 0% 100%); /* oklch(1.0000 0 0) */
+    --border: hsl(214.3 31.8% 91.4%); /* oklch(0.9271 0.0075 260.7315) */
+    --input: hsl(214.3 31.8% 91.4%); /* oklch(0.9271 0.0075 260.7315) */
+    --ring: hsl(221.2 83.2% 53.3%); /* oklch(0.7147 0.1929 47.7034) */
+    --radius: 0.3rem;
+
+    /* Chart Colors - Tier System */
+    --chart-tier-1: hsl(221.2 83.2% 53.3%); /* oklch(0.7147 0.1929 47.7034) - Primary blue */
+    --chart-tier-2: hsl(25 95% 53%); /* oklch(0.8216 0.1707 78.9825) - Orange */
+    --chart-tier-3: hsl(142 76% 36%); /* oklch(0.6854 0.1274 176.7352) - Green */
+    --chart-tier-4: hsl(0 84.2% 60.2%); /* oklch(0.6496 0.2362 26.9032) - Destructive red */
+    --chart-partner: hsl(262 83% 58%); /* oklch(0.4630 0.2040 299.6194) - Purple */
+    --chart-default: hsl(215.4 16.3% 46.9%); /* oklch(0.3836 0.1202 322.4976) - Muted gray */
+
+    /* Chart Score Colors */
+    --chart-score-excellent: hsl(142 76% 36%); /* oklch(0.6854 0.1274 176.7352) - Green for scores >= 8 */
+    --chart-score-good: hsl(25 95% 53%); /* oklch(0.8216 0.1707 78.9825) - Orange for scores >= 6 */
+    --chart-score-poor: hsl(0 84.2% 60.2%); /* oklch(0.6496 0.2362 26.9032) - Red for scores < 6 */
+
+    /* Chart UI Colors */
+    --chart-grid: hsl(214.3 31.8% 91.4%); /* oklch(0.9271 0.0075 260.7315) - Border color for grids */
+    --chart-selected: hsl(0 84.2% 60.2%); /* oklch(0.6496 0.2362 26.9032) - Destructive for selected items */
+    --chart-text: hsl(215.4 16.3% 46.9%); /* oklch(0.3836 0.1202 322.4976) - Muted foreground for annotations */
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 84% 4.9%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 94.1%;
+    /* Dark mode colors with HSL fallbacks */
+    --background: hsl(222.2 84% 4.9%); /* oklch(0.2046 0 0) */
+    --foreground: hsl(210 40% 98%); /* oklch(0.9219 0 0) */
+    --card: hsl(222.2 84% 4.9%); /* oklch(0.2686 0 0) */
+    --card-foreground: hsl(210 40% 98%); /* oklch(0.9219 0 0) */
+    --popover: hsl(222.2 84% 4.9%); /* oklch(0.2686 0 0) */
+    --popover-foreground: hsl(210 40% 98%); /* oklch(0.9219 0 0) */
+    --primary: hsl(217.2 91.2% 59.8%); /* oklch(0.7470 0.1636 68.2849) */
+    --primary-foreground: hsl(222.2 84% 4.9%); /* oklch(0 0 0) */
+    --secondary: hsl(217.2 32.6% 17.5%); /* oklch(0.2686 0 0) */
+    --secondary-foreground: hsl(210 40% 98%); /* oklch(0.9219 0 0) */
+    --muted: hsl(217.2 32.6% 17.5%); /* oklch(0.2686 0 0) */
+    --muted-foreground: hsl(215 20.2% 65.1%); /* oklch(0.7155 0 0) */
+    --accent: hsl(217.2 32.6% 17.5%); /* oklch(0.4910 0.1442 43.4774) */
+    --accent-foreground: hsl(210 40% 98%); /* oklch(0.9277 0.1183 95.5956) */
+    --destructive: hsl(0 62.8% 30.6%); /* oklch(0.6496 0.2362 26.9032) */
+    --destructive-foreground: hsl(210 40% 98%); /* oklch(1.0000 0 0) */
+    --border: hsl(217.2 32.6% 17.5%); /* oklch(0.3715 0 0) */
+    --input: hsl(217.2 32.6% 17.5%); /* oklch(0.3715 0 0) */
+    --ring: hsl(217.2 91.2% 59.8%); /* oklch(0.7470 0.1636 68.2849) */
+
+    /* Chart Colors - Dark Mode Variants */
+    --chart-tier-1: hsl(221.2 83.2% 53.3%); /* Same blue for consistency */
+    --chart-tier-2: hsl(25 95% 53%); /* Same orange for consistency */
+    --chart-tier-3: hsl(142 76% 36%); /* Same green for consistency */
+    --chart-tier-4: hsl(0 84.2% 60.2%); /* Same red for consistency */
+    --chart-partner: hsl(262 83% 58%); /* Same purple for consistency */
+    --chart-default: hsl(215 20.2% 65.1%); /* Lighter gray for dark mode */
+
+    /* Chart Score Colors - Dark Mode */
+    --chart-score-excellent: hsl(142 76% 36%); /* Same green */
+    --chart-score-good: hsl(25 95% 53%); /* Same orange */
+    --chart-score-poor: hsl(0 84.2% 60.2%); /* Same red */
+
+    /* Chart UI Colors - Dark Mode */
+    --chart-grid: hsl(217.2 32.6% 17.5%); /* Darker grid lines */
+    --chart-selected: hsl(0 84.2% 60.2%); /* Same selection color */
+    --chart-text: hsl(215 20.2% 65.1%); /* Lighter text for dark mode */
   }
 }
 

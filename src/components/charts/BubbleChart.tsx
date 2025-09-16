@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react'
 import Plot from 'react-plotly.js'
 import type { CompanyOverview } from '../../types/company'
+import { getTierColor, chartColors } from '../../utils/chartColors'
 
 interface BubbleChartProps {
   data: CompanyOverview[]
@@ -53,16 +54,9 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
     const color = isNumericColor 
       ? data.map(item => item[colorKey] as number)
       : data.map(item => {
-          // Map tier values to colors
+          // Map tier values to colors using CSS custom properties
           const tier = item[colorKey] as string
-          switch (tier) {
-            case 'Tier 1': return '#1f77b4' // Blue
-            case 'Tier 2': return '#ff7f0e' // Orange  
-            case 'Tier 3': return '#2ca02c' // Green
-            case 'Tier 4': return '#d62728' // Red
-            case 'Partner': return '#9467bd' // Purple
-            default: return '#7f7f7f' // Gray
-          }
+          return getTierColor(tier)
         })
     const text = data.map(item => 
       `${item.name}<br>` +
@@ -102,8 +96,8 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
             selectedKeys.includes(item.key) ? 3 : 1
           ) : 1,
           color: selectedKeys.length > 0 ? data.map(item => 
-            selectedKeys.includes(item.key) ? '#ff6b6b' : '#333'
-          ) : '#333'
+            selectedKeys.includes(item.key) ? chartColors.selected() : chartColors.foreground()
+          ) : chartColors.foreground()
         }
       },
       text,
@@ -150,7 +144,7 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
         text: 'Strategic Fit',
         font: { size: 14, family: 'Inter, sans-serif' }
       },
-      gridcolor: '#d1d5db', // Consistent grid line color
+      gridcolor: chartColors.grid(), // Use CSS custom property for grid color
       gridwidth: 2, // Consistent grid line thickness
       showgrid: true,
       // Fixed axis range for 4-quadrant view
@@ -158,7 +152,7 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
       showticklabels: false, // Hide axis values
       fixedrange: true, // Disable zoom/pan
       zeroline: true,
-      zerolinecolor: '#d1d5db', // Same color as grid lines
+      zerolinecolor: chartColors.grid(), // Use CSS custom property for zero line
       zerolinewidth: 2 // Same thickness as grid lines
     },
     yaxis: {
@@ -166,7 +160,7 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
         text: 'Ability to Execute',
         font: { size: 14, family: 'Inter, sans-serif' }
       },
-      gridcolor: '#d1d5db', // Consistent grid line color
+      gridcolor: chartColors.grid(), // Use CSS custom property for grid color
       gridwidth: 2, // Consistent grid line thickness
       showgrid: true,
       // Fixed axis range for 4-quadrant view
@@ -174,7 +168,7 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
       showticklabels: false, // Hide axis values
       fixedrange: true, // Disable zoom/pan
       zeroline: true,
-      zerolinecolor: '#d1d5db', // Same color as grid lines
+      zerolinecolor: chartColors.grid(), // Use CSS custom property for zero line
       zerolinewidth: 2 // Same thickness as grid lines
     },
     hovermode: 'closest' as const,
@@ -192,9 +186,9 @@ export const BubbleChart: React.FC<BubbleChartProps> = ({
         yref: 'paper' as const,
         text: 'Bubble size = Overall Score',
         showarrow: false,
-        font: { size: 12, color: '#666', family: 'Inter, sans-serif' },
-        bgcolor: 'rgba(255,255,255,0.8)',
-        bordercolor: '#d1d5db',
+        font: { size: 12, color: chartColors.text(), family: 'Inter, sans-serif' },
+        bgcolor: chartColors.background(),
+        bordercolor: chartColors.grid(),
         borderwidth: 1,
         borderpad: 4
       }
